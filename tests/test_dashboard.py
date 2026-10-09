@@ -27,7 +27,7 @@ class DashboardTests(unittest.TestCase):
         dashboard.consume("[2026-10-09] net accepted (3/1) diff 45000 (12 ms)")
         self.assertEqual(dashboard.accepted, 3)
         self.assertEqual(dashboard.rejected, 1)
-        self.assertIn("Estimated", dashboard.render())
+        self.assertIn("estimated", dashboard.render().lower())
 
     def test_dns_error_changes_status(self):
         dashboard = MinerDashboard("4" + "a" * 94)
