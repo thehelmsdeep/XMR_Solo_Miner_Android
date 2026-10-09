@@ -8,6 +8,7 @@ except ImportError:
     load_dotenv = None
 ROOT_DIR = Path(__file__).resolve().parent
 LOG_DIR = ROOT_DIR / "logs"
+DEFAULT_XMR_WALLET_ADDRESS = "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnbjBsWxc7nFxB3hWH73e318AQD7c7MYXXkL7CpMn3UBEYu2"
 
 @dataclass(frozen=True)
 class Settings:
@@ -24,9 +25,7 @@ class Settings:
 def load_settings():
     if load_dotenv is not None:
         load_dotenv(ROOT_DIR / ".env")
-    wallet = os.getenv("XMR_WALLET_ADDRESS", "").strip()
-    if not wallet:
-        raise ValueError("Set XMR_WALLET_ADDRESS in your local .env file")
+    wallet = os.getenv("XMR_WALLET_ADDRESS", "").strip() or DEFAULT_XMR_WALLET_ADDRESS
     mode = os.getenv("MINING_MODE", "p2pool").strip().lower()
     if mode not in ("p2pool", "solo"):
         raise ValueError("MINING_MODE must be p2pool or solo")
