@@ -24,7 +24,7 @@ class ConfigTests(unittest.TestCase):
     def settings_env(self, **extra):
         values = {
             "XMR_WALLET_ADDRESS": TEST_WALLET,
-            "MINING_MODE": "p2pool",
+            "MINING_MODE": "pool",
             "CPU_THREADS": "2",
         }
         values.update(extra)
@@ -55,6 +55,7 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("--threads", command)
         self.assertEqual(command[command.index("--threads") + 1], "8")
         self.assertIn("--randomx-mode=light", command)
+        self.assertNotIn("--daemon", command)
 
     def test_randomx_mode_can_be_overridden(self):
         with self.settings_env(RANDOMX_MODE="fast"):
@@ -85,7 +86,17 @@ class ConfigTests(unittest.TestCase):
 
     def test_reject_unknown_mode(self):
         with self.settings_env(MINING_MODE="invalid"):
-            with self.assertRaises(ValueError):
+            with self.assertRaisesRegex(ValueError, "Only MINING_MODE=pool"):
+                load_settings()
+
+    def test_reject_solo_mode(self):
+        with self.settings_env(MINING_MODE="solo"):
+            with self.assertRaisesRegex(ValueError, "Only MINING_MODE=pool"):
+                load_settings()
+
+    def test_reject_p2pool_mode(self):
+        with self.settings_env(MINING_MODE="p2pool"):
+            with self.assertRaisesRegex(ValueError, "Only MINING_MODE=pool"):
                 load_settings()
 
     def test_reject_invalid_thread_count(self):
@@ -103,18 +114,8 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "POOL_TLS"):
                 load_settings()
 
-    def test_p2pool_command_uses_wallet_and_endpoint(self):
-        with self.settings_env():
-            settings = load_settings()
-        command = build_command(settings)
-        self.assertIn("--keepalive", command)
-        self.assertIn("--url", command)
-        self.assertIn("127.0.0.1:3333", command)
-        self.assertIn(settings.wallet_address, command)
-
     def test_pool_command_uses_configured_endpoint_and_password(self):
         with self.settings_env(
-            MINING_MODE="pool",
             POOL_HOST="pool.example.org",
             POOL_PORT="4242",
             POOL_TLS="false",
@@ -127,32 +128,22 @@ class ConfigTests(unittest.TestCase):
         self.assertIn(settings.wallet_address, command)
         self.assertIn("--keepalive", command)
         self.assertNotIn("--tls", command)
+        self.assertNotIn("--daemon", command)
 
     def test_pool_command_can_enable_tls(self):
-        with self.settings_env(
-            MINING_MODE="pool",
-            POOL_HOST="pool.example.org",
-            POOL_PORT="4242",
-            POOL_TLS="true",
-        ):
+        with self.settings_env(POOL_HOST="pool.example.org", POOL_PORT="4242", POOL_TLS="true"):
             settings = load_settings()
         self.assertIn("--tls", build_command(settings))
 
     def test_pool_mode_requires_host(self):
-        with self.settings_env(MINING_MODE="pool", POOL_HOST="", POOL_PORT="4242"):
+        with self.settings_env(POOL_HOST="", POOL_PORT="4242"):
             with self.assertRaisesRegex(ValueError, "POOL_HOST"):
                 load_settings()
 
     def test_pool_mode_requires_valid_port(self):
-        with self.settings_env(MINING_MODE="pool", POOL_HOST="pool.example.org", POOL_PORT="0"):
+        with self.settings_env(POOL_HOST="pool.example.org", POOL_PORT="0"):
             with self.assertRaisesRegex(ValueError, "POOL_PORT"):
                 load_settings()
-
-    def test_solo_command_has_daemon_flag(self):
-        with self.settings_env(MINING_MODE="solo"):
-            command = build_command(load_settings())
-        self.assertIn("--daemon", command)
-        self.assertIn("127.0.0.1:18081", command)
 
 
 if __name__ == "__main__":
