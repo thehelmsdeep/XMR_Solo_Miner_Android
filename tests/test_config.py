@@ -8,7 +8,11 @@ from miner.xmrig import build_command
 
 class ConfigTests(unittest.TestCase):
     def settings_env(self, **extra):
-        values = {"XMR_WALLET_ADDRESS": "4" + "A" + "1" * 93, "MINING_MODE": "p2pool", "CPU_THREADS": "2"}
+        values = {
+            "XMR_WALLET_ADDRESS": "4" + "A" + "1" * 93,
+            "MINING_MODE": "p2pool",
+            "CPU_THREADS": "2",
+        }
         values.update(extra)
         return patch.dict(os.environ, values, clear=True)
 
@@ -55,6 +59,30 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("--url", command)
         self.assertIn("127.0.0.1:3333", command)
         self.assertIn(settings.wallet_address, command)
+
+    def test_pool_command_uses_configured_endpoint_and_password(self):
+        with self.settings_env(
+            MINING_MODE="pool",
+            POOL_HOST="pool.example.org",
+            POOL_PORT="4242",
+        ):
+            settings = load_settings()
+        command = build_command(settings)
+        self.assertIn("pool.example.org:4242", command)
+        self.assertIn("--pass", command)
+        self.assertIn("x", command)
+        self.assertIn(settings.wallet_address, command)
+        self.assertIn("--keepalive", command)
+
+    def test_pool_mode_requires_host(self):
+        with self.settings_env(MINING_MODE="pool", POOL_PORT="4242"):
+            with self.assertRaisesRegex(ValueError, "POOL_HOST"):
+                load_settings()
+
+    def test_pool_mode_requires_valid_port(self):
+        with self.settings_env(MINING_MODE="pool", POOL_HOST="pool.example.org", POOL_PORT="0"):
+            with self.assertRaisesRegex(ValueError, "POOL_PORT"):
+                load_settings()
 
     def test_solo_command_has_daemon_flag(self):
         with self.settings_env(MINING_MODE="solo"):
