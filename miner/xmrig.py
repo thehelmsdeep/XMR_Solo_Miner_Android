@@ -8,6 +8,7 @@ def build_command(settings: Settings) -> list[str]:
         "--no-color",
         "--threads",
         str(settings.cpu_threads),
+        f"--randomx-mode={settings.randomx_mode}",
         "--print-time",
         "10",
         "--user",
