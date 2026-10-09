@@ -12,10 +12,10 @@ DEFAULT_XMR_WALLET_ADDRESS = "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnb
 # Ready-to-use defaults for the current Termux setup. Environment variables can
 # override these, but a local .env file is not required or loaded.
 DEFAULT_MINING_MODE = "pool"
-DEFAULT_CPU_THREADS = 2
-# RandomX light mode avoids allocating the ~2.3 GiB fast dataset, which can
-# overwhelm Android devices with 3–4 GiB RAM. Use RANDOMX_MODE=fast on devices
-# with enough memory if maximum hashrate is preferred over memory usage.
+DEFAULT_CPU_THREADS = 8
+# Eight threads may increase heat and battery use on a phone. RandomX light mode
+# avoids allocating the ~2.3 GiB fast dataset, which can overwhelm Android
+# devices with 3–4 GiB RAM. Use RANDOMX_MODE=fast only if there is enough memory.
 DEFAULT_RANDOMX_MODE = "light"
 DEFAULT_XMRIG_PATH = "/data/data/com.termux/files/home/xmrig/build/xmrig"
 DEFAULT_POOL_HOST = "xmrpool.eu"
