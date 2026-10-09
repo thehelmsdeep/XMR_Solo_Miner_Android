@@ -26,6 +26,8 @@ def build_command(settings: Settings) -> list[str]:
             "x",
             "--keepalive",
         ]
+        if settings.pool_tls:
+            command.append("--tls")
     elif settings.mining_mode == "solo":
         command += [
             "--daemon",
