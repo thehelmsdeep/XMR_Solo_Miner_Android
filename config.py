@@ -6,11 +6,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent
 LOG_DIR = ROOT_DIR / "logs"
 
-# Public receiving address only. Never put a seed phrase or private key here.
-DEFAULT_XMR_WALLET_ADDRESS = "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnbjBsWxc7nFxB3hWH73e318AQD7c7MYXXkL7CpMn3UBEYu2"
-
-# Ready-to-use defaults for the current Termux setup. Environment variables can
-# override these, but a local .env file is not required or loaded.
+# Never store a wallet address, seed phrase, or private key in source control.
 DEFAULT_MINING_MODE = "pool"
 DEFAULT_CPU_THREADS = 8
 # Eight threads may increase heat and battery use on a phone. RandomX light mode
@@ -49,7 +45,9 @@ def is_plausible_monero_address(address: str) -> bool:
 
 
 def load_settings() -> Settings:
-    wallet = os.getenv("XMR_WALLET_ADDRESS", "").strip() or DEFAULT_XMR_WALLET_ADDRESS
+    wallet = os.getenv("XMR_WALLET_ADDRESS", "").strip()
+    if not wallet:
+        raise ValueError("XMR_WALLET_ADDRESS is required; set your public receiving address in the environment")
     if not is_plausible_monero_address(wallet):
         raise ValueError("XMR_WALLET_ADDRESS does not look like a standard mainnet Monero address (expected 95 or 106 characters)")
 
