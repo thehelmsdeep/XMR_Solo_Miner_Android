@@ -30,9 +30,12 @@ No local `.env` file is required. The default settings are in `config.py`; shell
 - Receiving wallet: the public Monero address currently set in `config.py`
 - Mining mode: `pool`
 - CPU threads: `2`
+- RandomX mode: `light` (lower memory use, usually lower hashrate)
 - XMRig path: `/data/data/com.termux/files/home/xmrig/build/xmrig`
 - Pool endpoint: `xmrpool.eu:3333`
 - TLS: enabled
+
+RandomX fast mode allocates a dataset of roughly 2.3 GiB. On Android devices with limited RAM this can cause heavy memory pressure or process termination. The default `light` mode uses substantially less memory to prioritize stability; it can produce a lower hashrate. If your device has sufficient RAM and you want to test fast mode, set `RANDOMX_MODE=fast`. Supported values are `auto`, `fast`, and `light`.
 
 The wallet address is public and visible to anyone because this is a public repository. It is a receiving address, not a private key or seed phrase. Never store a seed phrase or private key in this project. The config loader checks common address prefixes and lengths, but does **not** verify the address checksum or prove wallet ownership.
 
@@ -42,11 +45,12 @@ The defaults can be overridden with environment variables, for example:
 
 ```bash
 export CPU_THREADS=1
+export RANDOMX_MODE=light
 export XMRIG_PATH="$HOME/xmrig/build/xmrig"
 python run.py --check
 ```
 
-Other supported settings include `XMR_WALLET_ADDRESS`, `MINING_MODE` (`p2pool`, `pool`, or `solo`), `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, P2Pool endpoint settings, Monero daemon RPC settings, and `LOG_LEVEL`. A local `.env` file is not loaded.
+Other supported settings include `XMR_WALLET_ADDRESS`, `MINING_MODE` (`p2pool`, `pool`, or `solo`), `RANDOMX_MODE`, `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, P2Pool endpoint settings, Monero daemon RPC settings, and `LOG_LEVEL`. A local `.env` file is not loaded.
 
 ## Pool and payouts
 
@@ -62,7 +66,7 @@ python run.py
 python -m unittest discover -s tests -v
 ```
 
-`--check` validates settings and prints a planned command with the wallet hidden; it does not verify binary installation or network connectivity. `python run.py` launches XMRig, streams its output to `logs/miner.log`, and handles Ctrl+C shutdown. In an interactive Termux terminal it also renders a live dashboard similar to the BTC miner project, with wallet, status, hashrate, estimated interval/total hashes, accepted/rejected shares, pool difficulty, last job, and log path. XMRig hashrate is printed every 10 seconds. Hash totals are estimates derived from reported rates, not exact counters; redirected/non-interactive output remains normal timestamped logs. `python main.py` remains a compatibility entry point.
+`--check` validates settings and prints a planned command with the wallet hidden; it does not verify binary installation or network connectivity. `python run.py` launches XMRig, streams its output to `logs/miner.log`, logs nonzero XMRig exit statuses, and handles Ctrl+C shutdown. In an interactive Termux terminal it also renders a live dashboard similar to the BTC miner project, with wallet, status, hashrate, estimated interval/total hashes, accepted/rejected shares, pool difficulty, last job, and log path. XMRig hashrate is printed every 10 seconds. Hash totals are estimates derived from reported rates, not exact counters; redirected/non-interactive output remains normal timestamped logs. `python main.py` remains a compatibility entry point.
 
 ## Important
 
