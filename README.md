@@ -62,7 +62,7 @@ python run.py
 python -m unittest discover -s tests -v
 ```
 
-`--check` validates settings and prints a planned command with the wallet hidden; it does not verify binary installation or network connectivity. `python run.py` launches XMRig, streams its output to the terminal and `logs/miner.log`, and handles Ctrl+C shutdown. `python main.py` remains a compatibility entry point.
+`--check` validates settings and prints a planned command with the wallet hidden; it does not verify binary installation or network connectivity. `python run.py` launches XMRig, streams its output to `logs/miner.log`, and handles Ctrl+C shutdown. In an interactive Termux terminal it also renders a live dashboard similar to the BTC miner project, with wallet, status, hashrate, estimated interval/total hashes, accepted/rejected shares, pool difficulty, last job, and log path. XMRig hashrate is printed every 10 seconds. Hash totals are estimates derived from reported rates, not exact counters; redirected/non-interactive output remains normal timestamped logs. `python main.py` remains a compatibility entry point.
 
 ## Important
 
