@@ -1,10 +1,12 @@
-"""Launch XMRig and capture its output without logging wallet arguments."""
+"""Launch XMRig, save its logs, and render a compact live Termux dashboard."""
 import logging
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from config import LOG_DIR, Settings
+from miner.dashboard import MinerDashboard
 from miner.xmrig import build_command
 
 
@@ -17,7 +19,14 @@ def configure_logging(level: str) -> None:
             logging.StreamHandler(),
             logging.FileHandler(LOG_DIR / "miner.log", encoding="utf-8"),
         ],
+        force=True,
     )
+
+
+def _render_dashboard(dashboard: MinerDashboard) -> None:
+    # Clear only an interactive terminal; redirected output remains ordinary logs.
+    if sys.stdout.isatty():
+        print("\033[2J\033[H" + dashboard.render(), flush=True)
 
 
 def run_miner(settings: Settings) -> int:
@@ -32,6 +41,7 @@ def run_miner(settings: Settings) -> int:
         return 127
 
     logging.info("Launching XMRig mode=%s threads=%s; command arguments are not logged", settings.mining_mode, settings.cpu_threads)
+    dashboard = MinerDashboard(settings.wallet_address, str(LOG_DIR / "miner.log"))
     process = None
     try:
         process = subprocess.Popen(
@@ -43,9 +53,13 @@ def run_miner(settings: Settings) -> int:
             errors="replace",
             bufsize=1,
         )
+        _render_dashboard(dashboard)
         if process.stdout is not None:
             for line in process.stdout:
-                logging.info("XMRig: %s", line.rstrip())
+                message = line.rstrip()
+                logging.info("XMRig: %s", message)
+                if dashboard.consume(message):
+                    _render_dashboard(dashboard)
         return process.wait()
     except KeyboardInterrupt:
         logging.info("Stopping XMRig")
