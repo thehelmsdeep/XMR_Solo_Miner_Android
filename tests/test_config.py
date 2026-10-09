@@ -8,7 +8,7 @@ from config import (
     DEFAULT_POOL_HOST,
     DEFAULT_POOL_PORT,
     DEFAULT_POOL_TLS,
-    DEFAULT_WALLET_ADDRESS if False else DEFAULT_XMR_WALLET_ADDRESS,
+    DEFAULT_XMR_WALLET_ADDRESS,
     DEFAULT_XMRIG_PATH,
     is_plausible_monero_address,
     load_settings,
