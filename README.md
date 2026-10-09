@@ -38,25 +38,25 @@ The config loader checks common Monero address prefixes and lengths, but it does
 - `XMRIG_PATH`: installed XMRig executable path
 - `CPU_THREADS`: begin with a low thread count on phones
 - `P2POOL_STRATUM_HOST` / `P2POOL_STRATUM_PORT`: P2Pool Stratum endpoint (default is local `127.0.0.1:3333`)
-- `POOL_HOST` / `POOL_PORT`: hostname and port published by the standard Monero pool you choose; both must be configured for `MINING_MODE=pool`
+- `POOL_HOST` / `POOL_PORT`: hostname and port published by the standard Monero pool you choose
+- `POOL_TLS=true`: enable XMRig TLS for a pool endpoint that explicitly supports TLS; otherwise use `false`
 - `MONERO_RPC_HOST` / `MONERO_RPC_PORT`: daemon endpoint for Solo mode (default is local `127.0.0.1:18081`)
 - `LOG_LEVEL`: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`
 
 ### Standard pool mode
 
-To use a standard Monero mining pool, edit your local `.env` and set:
+Edit your local `.env` and set the exact hostname, port, and TLS setting published by the pool you choose:
 
 ```dotenv
 MINING_MODE=pool
-POOL_HOST=hostname-published-by-your-pool
-POOL_PORT=port-published-by-your-pool
+POOL_HOST=hostname-from-the-pool-documentation
+POOL_PORT=port-from-the-pool-documentation
+POOL_TLS=true
 ```
 
-Replace both placeholders with the exact endpoint from the pool's official documentation. Pool ports differ, and some endpoints require TLS; this launcher currently does not add a TLS flag automatically. Check the chosen pool's connection instructions, fees, minimum payout, and payout policy before mining. Do not assume a pool will pay just because XMRig starts.
+For example, XMRPool.eu currently documents `xmrpool.eu:3333` with TLS enabled. Its guide lists a 0.07 XMR minimum payment for a personal Monero wallet; check the pool's current official documentation and payout threshold before choosing it. That threshold may be impractical for a low-hashrate phone. Official setup details: https://www.xmrpool.eu/xmr-monero-easy-mining-guide.html
 
-The `pool` mode sends the wallet as XMRig's `--user` and sets `--pass x`, a common default for pools. A pool may require a different password/worker format; follow that pool's instructions.
-
-The local default endpoints only work if the corresponding service is actually running on the same device. This repository does not launch or configure those services. Do not expose unauthenticated RPC to the public internet; use a trusted node and secure network configuration.
+The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, and adds `--tls` only when `POOL_TLS=true`. A pool may require a different password/worker format; follow that pool's official instructions. Do not assume a pool will pay just because XMRig starts.
 
 ## Commands
 
