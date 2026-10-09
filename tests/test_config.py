@@ -34,6 +34,7 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(settings.mining_mode, DEFAULT_MINING_MODE)
         self.assertEqual(settings.mining_mode, "pool")
         self.assertEqual(settings.cpu_threads, DEFAULT_CPU_THREADS)
+        self.assertEqual(settings.cpu_threads, 8)
         self.assertEqual(settings.randomx_mode, DEFAULT_RANDOMX_MODE)
         self.assertEqual(settings.randomx_mode, "light")
         self.assertEqual(settings.xmrig_path, DEFAULT_XMRIG_PATH)
@@ -43,6 +44,8 @@ class ConfigTests(unittest.TestCase):
         command = build_command(settings)
         self.assertIn("xmrpool.eu:3333", command)
         self.assertIn("--tls", command)
+        self.assertIn("--threads", command)
+        self.assertEqual(command[command.index("--threads") + 1], "8")
         self.assertIn("--randomx-mode=light", command)
 
     def test_randomx_mode_can_be_overridden(self):
