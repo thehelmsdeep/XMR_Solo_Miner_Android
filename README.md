@@ -2,13 +2,12 @@
 
 A Python launcher for an already-installed XMRig binary on Termux, with P2Pool, standard pool, and solo command modes.
 
-> **Early development:** this repository does not install XMRig, run a Monero node or P2Pool, select a mining pool, or verify payouts. Passing unit tests does not prove mining works on a device.
+> **Early development:** this repository does not install XMRig, run a Monero node or P2Pool, or verify payouts. Passing unit tests does not prove mining works on a device.
 
 ## Requirements
 
 - Termux and Python 3.10+
 - A compatible XMRig executable built for your Android device
-- P2Pool Stratum endpoint for P2Pool mode, a configured Monero mining pool for pool mode, or reachable Monero daemon RPC for Solo mode
 
 ## Install
 
@@ -21,42 +20,39 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-cp -n .env.example .env
-nano .env
 python run.py --check
 ```
 
-## Wallet privacy
+No local `.env` file is required. The default settings are in `config.py`; shell environment variables can override them when needed. The default XMRig path is specific to the Termux setup where XMRig was built and may need changing on another device.
 
-The current default receiving address is stored in `config.py` and `.env.example`, as requested. Since this is a public repository, that public address is visible to anyone. It is not a private key or seed phrase. You can override it locally with `XMR_WALLET_ADDRESS` in `.env`; `.env` is ignored by Git. Never store a seed phrase or private key in this project.
+## Built-in defaults
 
-The config loader checks common Monero address prefixes and lengths, but it does **not** verify the address checksum or prove that you control the wallet.
+- Receiving wallet: the public Monero address currently set in `config.py`
+- Mining mode: `pool`
+- CPU threads: `2`
+- XMRig path: `/data/data/com.termux/files/home/xmrig/build/xmrig`
+- Pool endpoint: `xmrpool.eu:3333`
+- TLS: enabled
 
-## Settings
+The wallet address is public and visible to anyone because this is a public repository. It is a receiving address, not a private key or seed phrase. Never store a seed phrase or private key in this project. The config loader checks common address prefixes and lengths, but does **not** verify the address checksum or prove wallet ownership.
 
-- `MINING_MODE=p2pool`, `pool`, or `solo`
-- `XMRIG_PATH`: installed XMRig executable path
-- `CPU_THREADS`: begin with a low thread count on phones
-- `P2POOL_STRATUM_HOST` / `P2POOL_STRATUM_PORT`: P2Pool Stratum endpoint (default is local `127.0.0.1:3333`)
-- `POOL_HOST` / `POOL_PORT`: hostname and port published by the standard Monero pool you choose
-- `POOL_TLS=true`: enable XMRig TLS for a pool endpoint that explicitly supports TLS; otherwise use `false`
-- `MONERO_RPC_HOST` / `MONERO_RPC_PORT`: daemon endpoint for Solo mode (default is local `127.0.0.1:18081`)
-- `LOG_LEVEL`: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`
+## Optional overrides
 
-### Standard pool mode
+The defaults can be overridden with environment variables, for example:
 
-Edit your local `.env` and set the exact hostname, port, and TLS setting published by the pool you choose:
-
-```dotenv
-MINING_MODE=pool
-POOL_HOST=hostname-from-the-pool-documentation
-POOL_PORT=port-from-the-pool-documentation
-POOL_TLS=true
+```bash
+export CPU_THREADS=1
+export XMRIG_PATH="$HOME/xmrig/build/xmrig"
+python run.py --check
 ```
 
-For example, XMRPool.eu currently documents `xmrpool.eu:3333` with TLS enabled. Its guide lists a 0.07 XMR minimum payment for a personal Monero wallet; check the pool's current official documentation and payout threshold before choosing it. That threshold may be impractical for a low-hashrate phone. Official setup details: https://www.xmrpool.eu/xmr-monero-easy-mining-guide.html
+Other supported settings include `XMR_WALLET_ADDRESS`, `MINING_MODE` (`p2pool`, `pool`, or `solo`), `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, P2Pool endpoint settings, Monero daemon RPC settings, and `LOG_LEVEL`. A local `.env` file is not loaded.
 
-The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, and adds `--tls` only when `POOL_TLS=true`. A pool may require a different password/worker format; follow that pool's official instructions. Do not assume a pool will pay just because XMRig starts.
+## Pool and payouts
+
+The built-in example uses XMRPool.eu at `xmrpool.eu:3333` with TLS. Check the pool's current official instructions and payout threshold before mining: https://www.xmrpool.eu/xmr-monero-easy-mining-guide.html. Its published minimum payment may be impractical for a low-hashrate phone. The pool may change its endpoint or payout rules.
+
+The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, and adds `--tls`. A pool's connection policy and payout rules still apply. Do not assume a pool will pay just because XMRig starts.
 
 ## Commands
 
