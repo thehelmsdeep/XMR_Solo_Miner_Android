@@ -8,6 +8,7 @@ from config import (
     DEFAULT_POOL_HOST,
     DEFAULT_POOL_PORT,
     DEFAULT_POOL_TLS,
+    DEFAULT_RANDOMX_MODE,
     DEFAULT_XMR_WALLET_ADDRESS,
     DEFAULT_XMRIG_PATH,
     is_plausible_monero_address,
@@ -33,6 +34,8 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(settings.mining_mode, DEFAULT_MINING_MODE)
         self.assertEqual(settings.mining_mode, "pool")
         self.assertEqual(settings.cpu_threads, DEFAULT_CPU_THREADS)
+        self.assertEqual(settings.randomx_mode, DEFAULT_RANDOMX_MODE)
+        self.assertEqual(settings.randomx_mode, "light")
         self.assertEqual(settings.xmrig_path, DEFAULT_XMRIG_PATH)
         self.assertEqual(settings.pool_host, DEFAULT_POOL_HOST)
         self.assertEqual(settings.pool_port, DEFAULT_POOL_PORT)
@@ -40,6 +43,18 @@ class ConfigTests(unittest.TestCase):
         command = build_command(settings)
         self.assertIn("xmrpool.eu:3333", command)
         self.assertIn("--tls", command)
+        self.assertIn("--randomx-mode=light", command)
+
+    def test_randomx_mode_can_be_overridden(self):
+        with self.settings_env(RANDOMX_MODE="fast"):
+            settings = load_settings()
+        self.assertEqual(settings.randomx_mode, "fast")
+        self.assertIn("--randomx-mode=fast", build_command(settings))
+
+    def test_reject_invalid_randomx_mode(self):
+        with self.settings_env(RANDOMX_MODE="turbo"):
+            with self.assertRaisesRegex(ValueError, "RANDOMX_MODE"):
+                load_settings()
 
     def test_custom_wallet_overrides_default(self):
         wallet = "4" + "A" + "1" * 93
