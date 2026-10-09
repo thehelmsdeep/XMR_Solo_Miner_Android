@@ -51,6 +51,11 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "LOG_LEVEL"):
                 load_settings()
 
+    def test_reject_invalid_pool_tls_value(self):
+        with self.settings_env(POOL_TLS="sometimes"):
+            with self.assertRaisesRegex(ValueError, "POOL_TLS"):
+                load_settings()
+
     def test_p2pool_command_uses_wallet_and_endpoint(self):
         with self.settings_env():
             settings = load_settings()
@@ -73,6 +78,17 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("x", command)
         self.assertIn(settings.wallet_address, command)
         self.assertIn("--keepalive", command)
+        self.assertNotIn("--tls", command)
+
+    def test_pool_command_can_enable_tls(self):
+        with self.settings_env(
+            MINING_MODE="pool",
+            POOL_HOST="pool.example.org",
+            POOL_PORT="4242",
+            POOL_TLS="true",
+        ):
+            settings = load_settings()
+        self.assertIn("--tls", build_command(settings))
 
     def test_pool_mode_requires_host(self):
         with self.settings_env(MINING_MODE="pool", POOL_PORT="4242"):
