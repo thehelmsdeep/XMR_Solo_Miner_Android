@@ -29,7 +29,7 @@ No local `.env` file is required. The default settings are in `config.py`; shell
 
 - Receiving wallet: the public Monero address currently set in `config.py`
 - Mining mode: `pool`
-- CPU threads: `2`
+- CPU threads: `8` (higher phone heat and battery use are possible)
 - RandomX mode: `light` (lower memory use, usually lower hashrate)
 - XMRig path: `/data/data/com.termux/files/home/xmrig/build/xmrig`
 - Pool endpoint: `xmrpool.eu:3333`
@@ -44,7 +44,7 @@ The wallet address is public and visible to anyone because this is a public repo
 The defaults can be overridden with environment variables, for example:
 
 ```bash
-export CPU_THREADS=1
+export CPU_THREADS=2
 export RANDOMX_MODE=light
 export XMRIG_PATH="$HOME/xmrig/build/xmrig"
 python run.py --check
