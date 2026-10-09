@@ -1,13 +1,14 @@
-# XMR Solo Miner Android
+# XMR Pool Miner Android
 
-A Python launcher for an already-installed XMRig binary on Termux, with P2Pool, standard pool, and solo command modes.
+A Python launcher for an already-installed XMRig binary on Termux. This project supports **standard Monero pool mining only**; Solo and P2Pool modes are not supported.
 
-> **Early development:** this repository does not install XMRig, run a Monero node or P2Pool, or verify payouts. Passing unit tests does not prove mining works on a device.
+> **Early development:** this repository does not install XMRig or verify payouts. Passing unit tests does not prove mining works on a device.
 
 ## Requirements
 
 - Termux and Python 3.10+
 - A compatible XMRig executable built for your Android device
+- A Monero pool endpoint and a public receiving wallet address
 
 ## Install
 
@@ -29,15 +30,15 @@ The default XMRig path is specific to the Termux setup where XMRig was built and
 
 ## Built-in defaults
 
+- Mining mode: `pool` only
 - Receiving wallet: the public Monero address currently set in `config.py`
-- Mining mode: `pool`
 - CPU threads: `8` (higher phone heat and battery use are possible)
 - RandomX mode: `light` (lower memory use, usually lower hashrate)
 - XMRig path: `/data/data/com.termux/files/home/xmrig/build/xmrig`
 - Pool endpoint: `xmrpool.eu:3333`
 - TLS: enabled
 
-RandomX fast mode allocates a dataset of roughly 2.3 GiB. On Android devices with limited RAM this can cause heavy memory pressure or process termination. The default `light` mode uses substantially less memory to prioritize stability; it can produce a lower hashrate. If your device has sufficient RAM and you want to test fast mode, set `RANDOMX_MODE=fast`. Supported values are `auto`, `fast`, and `light`.
+RandomX fast mode allocates a dataset of roughly 2.3 GiB. On Android devices with limited RAM this can cause heavy memory pressure or process termination. The default `light` mode uses substantially less memory to prioritize stability; it can produce a lower hashrate. Supported values are `auto`, `fast`, and `light`.
 
 The config loader checks common address prefixes and lengths, but does **not** verify the address checksum or prove wallet ownership.
 
@@ -53,32 +54,13 @@ export XMRIG_PATH="$HOME/xmrig/build/xmrig"
 python run.py --check
 ```
 
-Other supported settings include `XMR_WALLET_ADDRESS`, `MINING_MODE` (`p2pool`, `pool`, or `solo`), `RANDOMX_MODE`, `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, P2Pool endpoint settings, Monero daemon RPC settings, and `LOG_LEVEL`. A local `.env` file is not loaded.
+Supported settings are `XMR_WALLET_ADDRESS`, `MINING_MODE=pool`, `RANDOMX_MODE`, `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, `CPU_THREADS`, `XMRIG_PATH`, and `LOG_LEVEL`. Setting `MINING_MODE=solo` or `MINING_MODE=p2pool` is rejected. A local `.env` file is not loaded automatically.
 
 ## Pool and payouts
 
 The built-in example uses XMRPool.eu at `xmrpool.eu:3333` with TLS. Check the pool's current official instructions and payout threshold before mining: https://www.xmrpool.eu/xmr-monero-easy-mining-guide.html. Its published minimum payment may be impractical for a low-hashrate phone. The pool may change its endpoint or payout rules.
 
-The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, and adds `--tls`. A pool's connection policy and payout rules still apply. Do not assume a pool will pay just because XMRig starts.
-
-## Solo mode (local Monero daemon required)
-
-Solo mode is intended for advanced testing and is **not ready just by setting `MINING_MODE=solo`**. It requires a separate, fully synchronized `monerod` process with its RPC endpoint reachable from this app. The launcher does not install, configure, or start a Monero node, and solo mining on a phone has an extremely low chance of finding a block.
-
-1. Install and run a compatible Monero daemon separately; allow it to finish synchronizing.
-2. Keep RPC bound to loopback on the same device where possible (default `127.0.0.1:18081`). Do not expose an unauthenticated daemon RPC endpoint to the public internet or an untrusted network.
-3. Configure Solo mode and check the daemon before starting:
-
-   ```bash
-   export MINING_MODE=solo
-   export MONERO_RPC_HOST=127.0.0.1
-   export MONERO_RPC_PORT=18081
-   python run.py --check
-   python run.py --check-daemon
-   python run.py
-   ```
-
-The launcher calls the read-only `get_info` RPC method before Solo mining and stops with an actionable error if the endpoint is unreachable or reports that synchronization is incomplete. `--check-daemon` performs this check without starting XMRig. This is a readiness check, not a guarantee that a block will be found or that any reward will be paid. The default RPC uses plain HTTP; remote RPC endpoints should not be used over untrusted networks.
+The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, keeps the connection alive, and adds `--tls` when enabled. A pool's connection policy and payout rules still apply. Do not assume a pool will pay just because XMRig starts.
 
 ## Commands
 
