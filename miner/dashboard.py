@@ -80,6 +80,13 @@ class MinerDashboard:
             changed = True
         return changed
 
+    def _format_rate(self) -> str:
+        rate = self.hashrate_hs
+        for threshold, unit in ((1_000_000_000, "GH/s"), (1_000_000, "MH/s"), (1_000, "kH/s")):
+            if rate >= threshold:
+                return f"{rate / threshold:.3f} {unit}"
+        return f"{rate:.2f} H/s"
+
     def render(self) -> str:
         return "\n".join([
             "============== XMR CPU Miner ==============",
