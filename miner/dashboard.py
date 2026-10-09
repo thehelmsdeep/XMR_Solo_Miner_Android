@@ -85,7 +85,7 @@ class MinerDashboard:
             "============== XMR CPU Miner ==============",
             f"Wallet       : {self.wallet}",
             f"Status       : {self.status}",
-            f"Hashrate     : {self.hashrate_hs / 1_000_000:.6f} MH/s",
+            f"Hashrate     : {self._format_rate()}",
             f"Interval Hash: ~{self.interval_hashes} (estimated from 10s rate)",
             f"Total Hashes : ~{int(self.total_hashes_est)} (estimated)",
             f"Accepted     : {self.accepted}",
