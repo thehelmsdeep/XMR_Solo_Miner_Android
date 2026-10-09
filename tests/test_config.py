@@ -2,7 +2,17 @@ import os
 import unittest
 from unittest.mock import patch
 
-from config import DEFAULT_XMR_WALLET_ADDRESS, is_plausible_monero_address, load_settings
+from config import (
+    DEFAULT_CPU_THREADS,
+    DEFAULT_MINING_MODE,
+    DEFAULT_POOL_HOST,
+    DEFAULT_POOL_PORT,
+    DEFAULT_POOL_TLS,
+    DEFAULT_WALLET_ADDRESS if False else DEFAULT_XMR_WALLET_ADDRESS,
+    DEFAULT_XMRIG_PATH,
+    is_plausible_monero_address,
+    load_settings,
+)
 from miner.xmrig import build_command
 
 
@@ -16,9 +26,20 @@ class ConfigTests(unittest.TestCase):
         values.update(extra)
         return patch.dict(os.environ, values, clear=True)
 
-    def test_default_wallet_is_used_when_env_is_empty(self):
-        with self.settings_env(XMR_WALLET_ADDRESS=""):
-            self.assertEqual(load_settings().wallet_address, DEFAULT_XMR_WALLET_ADDRESS)
+    def test_ready_to_use_defaults_are_configured_in_code(self):
+        with patch.dict(os.environ, {}, clear=True):
+            settings = load_settings()
+        self.assertEqual(settings.wallet_address, DEFAULT_XMR_WALLET_ADDRESS)
+        self.assertEqual(settings.mining_mode, DEFAULT_MINING_MODE)
+        self.assertEqual(settings.mining_mode, "pool")
+        self.assertEqual(settings.cpu_threads, DEFAULT_CPU_THREADS)
+        self.assertEqual(settings.xmrig_path, DEFAULT_XMRIG_PATH)
+        self.assertEqual(settings.pool_host, DEFAULT_POOL_HOST)
+        self.assertEqual(settings.pool_port, DEFAULT_POOL_PORT)
+        self.assertEqual(settings.pool_tls, DEFAULT_POOL_TLS)
+        command = build_command(settings)
+        self.assertIn("xmrpool.eu:3333", command)
+        self.assertIn("--tls", command)
 
     def test_custom_wallet_overrides_default(self):
         wallet = "4" + "A" + "1" * 93
@@ -70,6 +91,7 @@ class ConfigTests(unittest.TestCase):
             MINING_MODE="pool",
             POOL_HOST="pool.example.org",
             POOL_PORT="4242",
+            POOL_TLS="false",
         ):
             settings = load_settings()
         command = build_command(settings)
@@ -91,7 +113,7 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("--tls", build_command(settings))
 
     def test_pool_mode_requires_host(self):
-        with self.settings_env(MINING_MODE="pool", POOL_PORT="4242"):
+        with self.settings_env(MINING_MODE="pool", POOL_HOST="", POOL_PORT="4242"):
             with self.assertRaisesRegex(ValueError, "POOL_HOST"):
                 load_settings()
 
