@@ -61,6 +61,25 @@ The built-in example uses XMRPool.eu at `xmrpool.eu:3333` with TLS. Check the po
 
 The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, and adds `--tls`. A pool's connection policy and payout rules still apply. Do not assume a pool will pay just because XMRig starts.
 
+## Solo mode (local Monero daemon required)
+
+Solo mode is intended for advanced testing and is **not ready just by setting `MINING_MODE=solo`**. It requires a separate, fully synchronized `monerod` process with its RPC endpoint reachable from this app. The launcher does not install, configure, or start a Monero node, and solo mining on a phone has an extremely low chance of finding a block.
+
+1. Install and run a compatible Monero daemon separately; allow it to finish synchronizing.
+2. Keep RPC bound to loopback on the same device where possible (default `127.0.0.1:18081`). Do not expose an unauthenticated daemon RPC endpoint to the public internet or an untrusted network.
+3. Configure Solo mode and check the daemon before starting:
+
+   ```bash
+   export MINING_MODE=solo
+   export MONERO_RPC_HOST=127.0.0.1
+   export MONERO_RPC_PORT=18081
+   python run.py --check
+   python run.py --check-daemon
+   python run.py
+   ```
+
+The launcher calls the read-only `get_info` RPC method before Solo mining and stops with an actionable error if the endpoint is unreachable or reports that synchronization is incomplete. `--check-daemon` performs this check without starting XMRig. This is a readiness check, not a guarantee that a block will be found or that any reward will be paid. The default RPC uses plain HTTP; remote RPC endpoints should not be used over untrusted networks.
+
 ## Commands
 
 ```bash
