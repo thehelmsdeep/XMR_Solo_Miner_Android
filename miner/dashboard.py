@@ -6,10 +6,10 @@ does not provide an exact cumulative hash counter.
 import re
 import time
 
-_RATE_RE = re.compile(r"speed\\s+10s/60s/15m\\s+([\\d.]+)\\s+[^\\s]+\\s+[^\\s]+\\s+([kMGT]?H/s)")
-_SHARE_RE = re.compile(r"(?:accepted|rejected)\\s+\\((\\d+)/(\\d+)\\)")
-_DIFF_RE = re.compile(r"new job .*? diff\\s+(\\d+)")
-_JOB_RE = re.compile(r"new job .*? algo\\s+(\\S+)\\s+height\\s+(\\d+)")
+_RATE_RE = re.compile(r"speed\s+10s/60s/15m\s+([\d.]+)\s+[^\s]+\s+[^\s]+\s+([kMGT]?H/s)")
+_SHARE_RE = re.compile(r"(?:accepted|rejected)\s+\((\d+)/(\d+)\)")
+_DIFF_RE = re.compile(r"new job .*? diff\s+(\d+)")
+_JOB_RE = re.compile(r"new job .*? algo\s+(\S+)\s+height\s+(\d+)")
 
 
 def _rate_to_hs(value: str, unit: str) -> float:
@@ -85,7 +85,7 @@ class MinerDashboard:
         return f"{self.hashrate_hs / 1_000_000:.6f} MH/s"
 
     def render(self) -> str:
-        return "\\n".join([
+        return "\n".join([
             "============== XMR CPU Miner ==============",
             f"Wallet       : {self.wallet}",
             f"Status       : {self.status}",
