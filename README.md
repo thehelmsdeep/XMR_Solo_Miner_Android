@@ -8,7 +8,6 @@ A Python launcher for an already-installed XMRig binary on Termux, with P2Pool, 
 
 - Termux and Python 3.10+
 - A compatible XMRig executable built for your Android device
-- Your public Monero receiving address, supplied through the `XMR_WALLET_ADDRESS` environment variable
 
 ## Install
 
@@ -21,16 +20,16 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-export XMR_WALLET_ADDRESS='YOUR_PUBLIC_MONERO_RECEIVING_ADDRESS'
 python run.py --check
 ```
 
-The wallet is deliberately **not stored in the repository**. Set it in the current shell before running the miner. The environment variable is inherited by the launcher and XMRig. Do not use a seed phrase or private key.
+The default public receiving address is configured in `config.py`. You can override it by setting `XMR_WALLET_ADDRESS` in the shell. The address is public and is not a private key or seed phrase. Never store a seed phrase or private key in this project.
 
 The default XMRig path is specific to the Termux setup where XMRig was built and may need changing on another device.
 
 ## Built-in defaults
 
+- Receiving wallet: the public Monero address currently set in `config.py`
 - Mining mode: `pool`
 - CPU threads: `8` (higher phone heat and battery use are possible)
 - RandomX mode: `light` (lower memory use, usually lower hashrate)
@@ -54,7 +53,7 @@ export XMRIG_PATH="$HOME/xmrig/build/xmrig"
 python run.py --check
 ```
 
-Other supported settings include `MINING_MODE` (`p2pool`, `pool`, or `solo`), `RANDOMX_MODE`, `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, P2Pool endpoint settings, Monero daemon RPC settings, and `LOG_LEVEL`. A local `.env` file is not loaded.
+Other supported settings include `XMR_WALLET_ADDRESS`, `MINING_MODE` (`p2pool`, `pool`, or `solo`), `RANDOMX_MODE`, `POOL_HOST`, `POOL_PORT`, `POOL_TLS`, P2Pool endpoint settings, Monero daemon RPC settings, and `LOG_LEVEL`. A local `.env` file is not loaded.
 
 ## Pool and payouts
 
