@@ -13,12 +13,17 @@ DEFAULT_XMR_WALLET_ADDRESS = "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnb
 # override these, but a local .env file is not required or loaded.
 DEFAULT_MINING_MODE = "pool"
 DEFAULT_CPU_THREADS = 2
+# RandomX light mode avoids allocating the ~2.3 GiB fast dataset, which can
+# overwhelm Android devices with 3–4 GiB RAM. Use RANDOMX_MODE=fast on devices
+# with enough memory if maximum hashrate is preferred over memory usage.
+DEFAULT_RANDOMX_MODE = "light"
 DEFAULT_XMRIG_PATH = "/data/data/com.termux/files/home/xmrig/build/xmrig"
 DEFAULT_POOL_HOST = "xmrpool.eu"
 DEFAULT_POOL_PORT = 3333
 DEFAULT_POOL_TLS = True
 
 VALID_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+VALID_RANDOMX_MODES = {"auto", "fast", "light"}
 
 
 @dataclass(frozen=True)
@@ -26,6 +31,7 @@ class Settings:
     wallet_address: str
     mining_mode: str
     cpu_threads: int
+    randomx_mode: str
     xmrig_path: str
     p2pool_stratum_host: str
     p2pool_stratum_port: int
@@ -50,6 +56,10 @@ def load_settings() -> Settings:
     mode = os.getenv("MINING_MODE", DEFAULT_MINING_MODE).strip().lower()
     if mode not in ("p2pool", "pool", "solo"):
         raise ValueError("MINING_MODE must be p2pool, pool, or solo")
+
+    randomx_mode = os.getenv("RANDOMX_MODE", DEFAULT_RANDOMX_MODE).strip().lower()
+    if randomx_mode not in VALID_RANDOMX_MODES:
+        raise ValueError("RANDOMX_MODE must be auto, fast, or light")
 
     try:
         threads = int(os.getenv("CPU_THREADS", str(DEFAULT_CPU_THREADS)))
@@ -83,4 +93,7 @@ def load_settings() -> Settings:
     if log_level not in VALID_LOG_LEVELS:
         raise ValueError("LOG_LEVEL must be DEBUG, INFO, WARNING, ERROR, or CRITICAL")
 
-    return Settings(wallet, mode, threads, xmrig_path, p2host, p2port, poolhost, poolport, pool_tls, rpchost, rpcport, log_level)
+    return Settings(
+        wallet, mode, threads, randomx_mode, xmrig_path, p2host, p2port,
+        poolhost, poolport, pool_tls, rpchost, rpcport, log_level
+    )
