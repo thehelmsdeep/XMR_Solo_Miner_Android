@@ -2,9 +2,11 @@
 import argparse
 import logging
 import sys
+
 from config import load_settings
 from miner.process_manager import configure_logging, run_miner
 from miner.xmrig import build_command
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Termux XMRig launcher")
@@ -22,6 +24,7 @@ def main() -> int:
         print("Configuration: OK")
         print(f"Mode: {settings.mining_mode}")
         print(f"CPU threads: {settings.cpu_threads}")
+        print(f"RandomX mode: {settings.randomx_mode}")
         print("Planned command (wallet hidden): " + " ".join(safe))
         print("This does not verify binary installation or network connectivity.")
         return 0
@@ -30,6 +33,7 @@ def main() -> int:
     except OSError as exc:
         logging.error("Could not run XMRig: %s", exc)
         return 1
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
