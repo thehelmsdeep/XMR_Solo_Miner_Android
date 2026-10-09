@@ -17,6 +17,7 @@ _CONNECTION_ERROR_MARKERS = (
     "connection timeout",
     "connection error",
     "network unreachable",
+    "network is unreachable",
     "no route to host",
     "temporary failure in name resolution",
     "failed to connect",
