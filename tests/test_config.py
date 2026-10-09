@@ -9,6 +9,7 @@ from config import (
     DEFAULT_POOL_PORT,
     DEFAULT_POOL_TLS,
     DEFAULT_RANDOMX_MODE,
+    DEFAULT_XMR_WALLET_ADDRESS,
     DEFAULT_XMRIG_PATH,
     is_plausible_monero_address,
     load_settings,
@@ -29,15 +30,15 @@ class ConfigTests(unittest.TestCase):
         values.update(extra)
         return patch.dict(os.environ, values, clear=True)
 
-    def test_wallet_must_be_supplied_through_environment(self):
+    def test_default_wallet_is_configured_in_code(self):
         with patch.dict(os.environ, {}, clear=True):
-            with self.assertRaisesRegex(ValueError, "XMR_WALLET_ADDRESS is required"):
-                load_settings()
-
-    def test_ready_to_use_defaults_except_wallet_are_configured_in_code(self):
-        with patch.dict(os.environ, {"XMR_WALLET_ADDRESS": TEST_WALLET}, clear=True):
             settings = load_settings()
-        self.assertEqual(settings.wallet_address, TEST_WALLET)
+        self.assertEqual(settings.wallet_address, DEFAULT_XMR_WALLET_ADDRESS)
+        self.assertEqual(settings.wallet_address, "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnbjBsWxc7nFxB3hWH73e318AQD7c7MYXXkL7CpMn3UBEYu2")
+
+    def test_ready_to_use_defaults_are_configured_in_code(self):
+        with patch.dict(os.environ, {}, clear=True):
+            settings = load_settings()
         self.assertEqual(settings.mining_mode, DEFAULT_MINING_MODE)
         self.assertEqual(settings.mining_mode, "pool")
         self.assertEqual(settings.cpu_threads, DEFAULT_CPU_THREADS)
@@ -66,7 +67,7 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "RANDOMX_MODE"):
                 load_settings()
 
-    def test_custom_wallet_overrides_environment_value(self):
+    def test_custom_wallet_overrides_default(self):
         wallet = "4" + "B" + "2" * 93
         with self.settings_env(XMR_WALLET_ADDRESS=wallet):
             self.assertEqual(load_settings().wallet_address, wallet)
