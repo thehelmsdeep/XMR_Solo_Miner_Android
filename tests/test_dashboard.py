@@ -24,10 +24,19 @@ class DashboardTests(unittest.TestCase):
         ))
         self.assertEqual(dashboard.hashrate_hs, 1250)
         self.assertEqual(dashboard.interval_hashes, 12500)
+        self.assertEqual(dashboard._format_rate(), "0.001250 MH/s")
         dashboard.consume("[2026-10-09] net accepted (3/1) diff 45000 (12 ms)")
         self.assertEqual(dashboard.accepted, 3)
         self.assertEqual(dashboard.rejected, 1)
         self.assertIn("estimated", dashboard.render().lower())
+        self.assertIn("Hashrate     : 0.001250 MH/s", dashboard.render())
+
+    def test_small_hashrate_is_shown_as_fractional_mhs(self):
+        dashboard = MinerDashboard("4" + "a" * 94)
+        dashboard.consume(
+            "[2026-10-09] miner speed 10s/60s/15m 23.12 21.93 n/a H/s max 23.12 H/s"
+        )
+        self.assertEqual(dashboard._format_rate(), "0.000023 MH/s")
 
     def test_dns_error_changes_status(self):
         dashboard = MinerDashboard("4" + "a" * 94)
