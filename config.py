@@ -24,6 +24,7 @@ class Settings:
     p2pool_stratum_port: int
     pool_host: str
     pool_port: int
+    pool_tls: bool
     monero_rpc_host: str
     monero_rpc_port: int
     log_level: str
@@ -65,6 +66,10 @@ def load_settings() -> Settings:
     xmrig_path = os.getenv("XMRIG_PATH", "xmrig").strip()
     p2host = os.getenv("P2POOL_STRATUM_HOST", "127.0.0.1").strip()
     poolhost = os.getenv("POOL_HOST", "").strip()
+    pool_tls_raw = os.getenv("POOL_TLS", "false").strip().lower()
+    if pool_tls_raw not in ("1", "true", "yes", "0", "false", "no"):
+        raise ValueError("POOL_TLS must be true or false")
+    pool_tls = pool_tls_raw in ("1", "true", "yes")
     rpchost = os.getenv("MONERO_RPC_HOST", "127.0.0.1").strip()
     if not xmrig_path or not p2host or not rpchost:
         raise ValueError("XMRIG_PATH and endpoint hosts must not be empty")
@@ -75,4 +80,4 @@ def load_settings() -> Settings:
     if log_level not in VALID_LOG_LEVELS:
         raise ValueError("LOG_LEVEL must be DEBUG, INFO, WARNING, ERROR, or CRITICAL")
 
-    return Settings(wallet, mode, threads, xmrig_path, p2host, p2port, poolhost, poolport, rpchost, rpcport, log_level)
+    return Settings(wallet, mode, threads, xmrig_path, p2host, p2port, poolhost, poolport, pool_tls, rpchost, rpcport, log_level)
