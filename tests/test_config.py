@@ -17,20 +17,28 @@ from config import (
 from miner.xmrig import build_command
 
 
+TEST_WALLET = "4" + "A" + "1" * 93
+
+
 class ConfigTests(unittest.TestCase):
     def settings_env(self, **extra):
         values = {
-            "XMR_WALLET_ADDRESS": "4" + "A" + "1" * 93,
+            "XMR_WALLET_ADDRESS": TEST_WALLET,
             "MINING_MODE": "p2pool",
             "CPU_THREADS": "2",
         }
         values.update(extra)
         return patch.dict(os.environ, values, clear=True)
 
-    def test_ready_to_use_defaults_are_configured_in_code(self):
+    def test_default_wallet_is_configured_in_code(self):
         with patch.dict(os.environ, {}, clear=True):
             settings = load_settings()
         self.assertEqual(settings.wallet_address, DEFAULT_XMR_WALLET_ADDRESS)
+        self.assertEqual(settings.wallet_address, "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnbjBsWxc7nFxB3hWH73e318AQD7c7MYXXkL7CpMn3UBEYu2")
+
+    def test_ready_to_use_defaults_are_configured_in_code(self):
+        with patch.dict(os.environ, {}, clear=True):
+            settings = load_settings()
         self.assertEqual(settings.mining_mode, DEFAULT_MINING_MODE)
         self.assertEqual(settings.mining_mode, "pool")
         self.assertEqual(settings.cpu_threads, DEFAULT_CPU_THREADS)
@@ -60,7 +68,7 @@ class ConfigTests(unittest.TestCase):
                 load_settings()
 
     def test_custom_wallet_overrides_default(self):
-        wallet = "4" + "A" + "1" * 93
+        wallet = "4" + "B" + "2" * 93
         with self.settings_env(XMR_WALLET_ADDRESS=wallet):
             self.assertEqual(load_settings().wallet_address, wallet)
 

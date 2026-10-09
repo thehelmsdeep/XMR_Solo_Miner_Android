@@ -10,6 +10,21 @@ _RATE_RE = re.compile(r"speed\s+10s/60s/15m\s+([\d.]+)\s+[^\s]+\s+[^\s]+\s+([kMG
 _SHARE_RE = re.compile(r"(?:accepted|rejected)\s+\((\d+)/(\d+)\)")
 _DIFF_RE = re.compile(r"new job .*? diff\s+(\d+)")
 _JOB_RE = re.compile(r"new job .*? algo\s+(\S+)\s+height\s+(\d+)")
+_CONNECTION_ERROR_MARKERS = (
+    "dns error",
+    "connection refused",
+    "connect error",
+    "connection timeout",
+    "connection error",
+    "network unreachable",
+    "network is unreachable",
+    "no route to host",
+    "temporary failure in name resolution",
+    "failed to connect",
+    "failed to resolve",
+    "resolve error",
+    "retry in",
+)
 
 
 def _rate_to_hs(value: str, unit: str) -> float:
@@ -38,6 +53,13 @@ class MinerDashboard:
         """Update state from one XMRig line; return True when dashboard changes."""
         changed = False
         lower = line.lower()
+        if any(marker in lower for marker in _CONNECTION_ERROR_MARKERS):
+            self.status = "Connection error"
+            self.last_event = line.strip()
+            self.hashrate_hs = 0.0
+            self.interval_hashes = 0
+            self._last_sample = None
+            changed = True
         if "use pool " in lower:
             self.status = "Connected"
             self.last_event = "Connected to pool"
@@ -51,10 +73,6 @@ class MinerDashboard:
             if match:
                 self.last_job = f"{match.group(1)} @ height {match.group(2)}"
             self.last_event = "Pool sent a new job"
-            changed = True
-        if "dns error" in lower or "connection refused" in lower or "connect error" in lower or "connection timeout" in lower:
-            self.status = "Connection error"
-            self.last_event = line.strip()
             changed = True
         share_match = _SHARE_RE.search(line)
         if share_match:
@@ -75,7 +93,8 @@ class MinerDashboard:
             self._last_sample = now
             self.hashrate_hs = rate
             self.interval_hashes = round(rate * 10)
-            self.status = "Mining..." if self.status != "Connection error" else self.status
+            if self.status != "Connection error":
+                self.status = "Mining..."
             self.last_event = "Hashrate updated"
             changed = True
         return changed

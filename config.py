@@ -8,9 +8,6 @@ LOG_DIR = ROOT_DIR / "logs"
 
 # Public receiving address only. Never put a seed phrase or private key here.
 DEFAULT_XMR_WALLET_ADDRESS = "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnbjBsWxc7nFxB3hWH73e318AQD7c7MYXXkL7CpMn3UBEYu2"
-
-# Ready-to-use defaults for the current Termux setup. Environment variables can
-# override these, but a local .env file is not required or loaded.
 DEFAULT_MINING_MODE = "pool"
 DEFAULT_CPU_THREADS = 8
 # Eight threads may increase heat and battery use on a phone. RandomX light mode

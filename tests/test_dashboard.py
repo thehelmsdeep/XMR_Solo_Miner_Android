@@ -44,6 +44,17 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(dashboard.status, "Connection error")
         self.assertIn("DNS error", dashboard.last_event)
 
+    def test_network_unreachable_resets_live_rate(self):
+        dashboard = MinerDashboard("4" + "a" * 94)
+        dashboard.consume(
+            "[2026-10-09] miner speed 10s/60s/15m 100.0 99.0 n/a H/s max 100.0 H/s"
+        )
+        dashboard.consume("[2026-10-09] net error: Network is unreachable")
+        self.assertEqual(dashboard.status, "Connection error")
+        self.assertEqual(dashboard.hashrate_hs, 0.0)
+        self.assertEqual(dashboard.interval_hashes, 0)
+        self.assertIn("Network is unreachable", dashboard.last_event)
+
 
 if __name__ == "__main__":
     unittest.main()
