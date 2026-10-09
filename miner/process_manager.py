@@ -40,7 +40,12 @@ def run_miner(settings: Settings) -> int:
         logging.error("XMRig executable not found: %s; install it or set XMRIG_PATH", settings.xmrig_path)
         return 127
 
-    logging.info("Launching XMRig mode=%s threads=%s; command arguments are not logged", settings.mining_mode, settings.cpu_threads)
+    logging.info(
+        "Launching XMRig mode=%s threads=%s randomx_mode=%s; command arguments are not logged",
+        settings.mining_mode,
+        settings.cpu_threads,
+        settings.randomx_mode,
+    )
     dashboard = MinerDashboard(settings.wallet_address, str(LOG_DIR / "miner.log"))
     process = None
     try:
@@ -60,7 +65,12 @@ def run_miner(settings: Settings) -> int:
                 logging.info("XMRig: %s", message)
                 if dashboard.consume(message):
                     _render_dashboard(dashboard)
-        return process.wait()
+        return_code = process.wait()
+        if return_code != 0:
+            logging.warning("XMRig exited with status %s", return_code)
+        else:
+            logging.info("XMRig exited normally")
+        return return_code
     except KeyboardInterrupt:
         logging.info("Stopping XMRig")
         if process is None:
