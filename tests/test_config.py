@@ -1,7 +1,7 @@
 import os
 import unittest
 from unittest.mock import patch
-from config import load_settings
+from config import DEFAULT_XMR_WALLET_ADDRESS, load_settings
 from miner.xmrig import build_command
 
 class ConfigTests(unittest.TestCase):
@@ -15,10 +15,10 @@ class ConfigTests(unittest.TestCase):
             settings = load_settings()
         self.assertEqual(settings.mining_mode, "p2pool")
 
-    def test_reject_empty_wallet(self):
+    def test_empty_wallet_uses_default(self):
         with self.settings_env(XMR_WALLET_ADDRESS=""):
-            with self.assertRaises(ValueError):
-                load_settings()
+            settings = load_settings()
+        self.assertEqual(settings.wallet_address, DEFAULT_XMR_WALLET_ADDRESS)
 
     def test_reject_unknown_mode(self):
         with self.settings_env(MINING_MODE="invalid"):
