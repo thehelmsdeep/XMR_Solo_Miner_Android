@@ -14,15 +14,15 @@ def main() -> int:
     action.add_argument("--check", action="store_true", help="validate settings without mining")
     action.add_argument(
         "--optimize", action="store_true",
-        help="benchmark thread-count candidates locally; does not connect to a pool",
+        help="sample thread-count candidates locally; does not connect to a mining pool",
     )
     parser.add_argument(
         "--optimizer-max-threads", type=int, default=8,
         help="maximum thread count to test with --optimize (default: 8)",
     )
     parser.add_argument(
-        "--optimizer-timeout", type=int, default=90,
-        help="seconds allowed for each benchmark candidate (default: 90)",
+        "--optimizer-timeout", type=int, default=25,
+        help="seconds to sample each candidate (default: 25)",
     )
     args = parser.parse_args()
     try:
@@ -59,14 +59,14 @@ def main() -> int:
         for result in report["results"]:
             rate = result["hashrate_hs"]
             rate_text = f"{rate:.2f} H/s" if rate is not None else "not measured"
-            suffix = " (timed out)" if result["timed_out"] else ""
+            suffix = " (sample window ended)" if result["sample_window_ended"] else ""
             print(f"  {result['threads']:>2} thread(s): {rate_text}{suffix}")
         if report["recommended_threads"] is None:
-            print("No usable benchmark rate was found. Check your XMRig build and logs.")
+            print("No usable hashrate sample was found. Check your XMRig build and logs.")
             return 3
         print(
             f"Recommended starting point: CPU_THREADS={report['recommended_threads']} "
-            f"({report['recommended_hashrate_hs']:.2f} H/s in this benchmark)"
+            f"({report['recommended_hashrate_hs']:.2f} H/s in this sample)"
         )
         print(f"Report saved to: {LOG_DIR / 'optimizer.json'}")
         print("No settings were changed. Set CPU_THREADS manually after checking stability.")
