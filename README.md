@@ -44,21 +44,21 @@ The config loader checks common address prefixes and lengths, but does **not** v
 
 ## Adaptive RandomX Optimizer
 
-Run a local benchmark before mining:
+Run a short local stress sample before mining:
 
 ```bash
 python run.py --optimize
 ```
 
-The optimizer tests a small set of thread counts (normally 1, 2, 4, and up to 8) using XMRig's built-in `--bench=1M` mode and the currently configured RandomX mode. It does **not** connect to the pool, submit shares, alter wallet settings, or change `CPU_THREADS` automatically. Results are saved to `logs/optimizer.json`.
+The optimizer samples a small set of thread counts (normally 1, 2, 4, and up to 8) using XMRig's built-in `--stress` mode and the currently configured RandomX mode. It does **not** pass a wallet or pool endpoint, submit shares, or change `CPU_THREADS` automatically. XMRig stress mode may require internet access for its own setup, but it is not configured to mine to your pool. Results are saved to `logs/optimizer.json`.
 
 Optional controls:
 
 ```bash
-python run.py --optimize --optimizer-max-threads 6 --optimizer-timeout 120
+python run.py --optimize --optimizer-max-threads 6 --optimizer-timeout 30
 ```
 
-The maximum thread count is capped at the detected CPU count. Each candidate has its own timeout. Benchmark rates are short-run measurements and may not reflect long-term performance after Android thermal throttling. Compare results with a sustained mining run and monitor phone temperature before applying a recommendation. The optimizer only tests the configured RandomX mode; it deliberately does not force RandomX fast mode on memory-limited phones.
+Each candidate is sampled for 25 seconds by default (configurable from 10 to 120 seconds). The maximum thread count is capped at the detected CPU count. These short samples are only a starting point: sustained hashrate can fall due to Android thermal throttling. Monitor temperature and compare with a longer normal run before applying the recommendation. The optimizer only tests the configured RandomX mode and does not force RandomX fast mode on memory-limited phones.
 
 ## Optional overrides
 
