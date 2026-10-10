@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from config import load_settings
 from miner.optimizer import (
-    build_benchmark_command, candidate_thread_counts, parse_hashrate, run_optimizer,
+    build_stress_command, candidate_thread_counts, parse_hashrate, run_optimizer,
 )
 
 SPEED_HS = "speed 10s/60s/15m 23.12 21.93 n/a H/s max 23.12 H/s"
@@ -32,9 +32,10 @@ class OptimizerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             candidate_thread_counts(0, 8)
 
-    def test_benchmark_command_has_no_pool_or_wallet(self):
-        command = build_benchmark_command("/tmp/xmrig", 4, "light")
-        self.assertIn("--bench=1M", command)
+    def test_stress_command_has_no_pool_or_wallet(self):
+        command = build_stress_command("/tmp/xmrig", 4, "light")
+        self.assertIn("--stress", command)
+        self.assertIn("--print-time=5", command)
         self.assertIn("--threads", command)
         self.assertIn("4", command)
         self.assertIn("--randomx-mode=light", command)
@@ -66,7 +67,7 @@ class OptimizerTests(unittest.TestCase):
             self.assertEqual(report["recommended_hashrate_hs"], 1250.0)
             self.assertEqual(settings.cpu_threads, 8)
 
-    def test_optimizer_records_timeout(self):
+    def test_optimizer_records_sample_window_end(self):
         settings = load_settings()
 
         def timeout_runner(command, **kwargs):
@@ -82,7 +83,7 @@ class OptimizerTests(unittest.TestCase):
                 output_path=Path(temp_dir) / "optimizer.json",
                 runner=timeout_runner, cpu_count=1,
             )
-        self.assertTrue(report["results"][0]["timed_out"])
+        self.assertTrue(report["results"][0]["sample_window_ended"])
         self.assertEqual(report["recommended_threads"], 1)
 
     def test_timeout_validation(self):
