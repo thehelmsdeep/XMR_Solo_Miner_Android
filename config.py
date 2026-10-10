@@ -9,8 +9,9 @@ LOG_DIR = ROOT_DIR / "logs"
 # Public receiving address only. Never put a seed phrase or private key here.
 DEFAULT_XMR_WALLET_ADDRESS = "45YfAsuTdSjSo2rw5ov137A8Y6TdY6pY3Z5ZWQa6oX28A1ysnbjBsWxc7nFxB3hWH73e318AQD7c7MYXXkL7CpMn3UBEYu2"
 DEFAULT_MINING_MODE = "pool"
-# Conservative baseline for Android devices with limited available RAM; benchmark higher counts on-device.
-DEFAULT_CPU_THREADS = 2
+# The maintainer's Android device tested higher throughput at 8 threads. RandomX light
+# mode remains the safe default for phones with limited RAM; users can override threads.
+DEFAULT_CPU_THREADS = 8
 # Eight threads may increase heat and battery use on a phone. RandomX light mode
 # avoids allocating the ~2.3 GiB fast dataset, which can overwhelm Android
 # devices with 3–4 GiB RAM. Use RANDOMX_MODE=fast only if there is enough memory.
