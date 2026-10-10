@@ -1,3 +1,4 @@
+import os
 import subprocess
 import tempfile
 import unittest
@@ -12,6 +13,11 @@ from miner.optimizer import (
 
 SPEED_HS = "speed 10s/60s/15m 23.12 21.93 n/a H/s max 23.12 H/s"
 SPEED_KHS = "speed 10s/60s/15m 1.25 1.20 n/a kH/s max 1.30 kH/s"
+
+
+def clean_settings():
+    with patch.dict(os.environ, {}, clear=True):
+        return load_settings()
 
 
 class OptimizerTests(unittest.TestCase):
@@ -43,7 +49,7 @@ class OptimizerTests(unittest.TestCase):
         self.assertNotIn("--user", command)
 
     def test_optimizer_saves_best_candidate_without_mutating_settings(self):
-        settings = load_settings()
+        settings = clean_settings()
         fake_results = {
             "1": SPEED_HS,
             "2": SPEED_KHS,
