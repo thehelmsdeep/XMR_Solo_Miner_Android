@@ -42,6 +42,24 @@ RandomX fast mode allocates a dataset of roughly 2.3 GiB. On Android devices wit
 
 The config loader checks common address prefixes and lengths, but does **not** verify the address checksum or prove wallet ownership.
 
+## Adaptive RandomX Optimizer
+
+Run a local benchmark before mining:
+
+```bash
+python run.py --optimize
+```
+
+The optimizer tests a small set of thread counts (normally 1, 2, 4, and up to 8) using XMRig's built-in `--bench=1M` mode and the currently configured RandomX mode. It does **not** connect to the pool, submit shares, alter wallet settings, or change `CPU_THREADS` automatically. Results are saved to `logs/optimizer.json`.
+
+Optional controls:
+
+```bash
+python run.py --optimize --optimizer-max-threads 6 --optimizer-timeout 120
+```
+
+The maximum thread count is capped at the detected CPU count. Each candidate has its own timeout. Benchmark rates are short-run measurements and may not reflect long-term performance after Android thermal throttling. Compare results with a sustained mining run and monitor phone temperature before applying a recommendation. The optimizer only tests the configured RandomX mode; it deliberately does not force RandomX fast mode on memory-limited phones.
+
 ## Optional overrides
 
 The defaults can be overridden with environment variables, for example:
@@ -66,6 +84,7 @@ The `pool` mode sends the wallet as XMRig's `--user`, sets `--pass x`, keeps the
 
 ```bash
 python run.py --check
+python run.py --optimize
 python run.py
 python -m unittest discover -s tests -v
 ```
